@@ -1,9 +1,9 @@
-MagentoCode/target/
-MagentoCode/.idea/
-MagentoCode/.classpath
-MagentoCode/magento.iml
-MagentoCode/test-output/
-MagentoCode/.settings/
-magento_data/Reports
-magento_data/Logs/
+code/target/
+code/.idea/
+code/.classpath
+code/magento.iml
+code/test-output/
+code/.settings/
+momstore_data/Reports/
+momstore_data/Logs/
 .idea/
