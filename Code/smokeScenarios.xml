@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Smoke Tests">
+    <listeners>
+        <listener class-name="com.momstore.listener.Listener"/>
+    </listeners>
+    <test thread-count="5" name="SmokeTests">
+        <groups>
+            <run>
+                <include name="userAccounts.accountLogin"/>
+                <exclude name="productDetails.*"/>
+                <exclude name="addToCart.*"/>
+                <exclude name="placeOrder.*"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.momstore.UserAccounts"/>
+            <class name="com.momstore.ProductDetails"/>
+            <class name="com.momstore.AddToCart"/>
+            <class name="com.momstore.PlaceOrder"/>
+        </classes>
+    </test>
+</suite>

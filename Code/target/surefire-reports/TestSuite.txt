@@ -1,0 +1,8 @@
+-------------------------------------------------------------------------------
+Test set: TestSuite
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 25.762 s <<< FAILURE! - in TestSuite
+accountLogin(com.momstore.UserAccounts)  Time elapsed: 4.015 s  <<< FAILURE!
+java.lang.AssertionError: expected [SignIn] but found [Sign In with Email]
+	at com.momstore.UserAccounts.accountLogin(UserAccounts.java:108)
+
