@@ -4,13 +4,15 @@ import com.momstore.extent_reports.ExtentReport;
 import com.momstore.loggers.Loggers;
 import com.momstore.pickers.RandomPicker;
 import com.momstore.utilities.ExcelUtils;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class ListingModel {
@@ -20,13 +22,13 @@ public class ListingModel {
     private String list_product_old_price;
     private int product_id;
 
-    @FindBy(css = ".product-item")
+    @FindBy(css = ".product-items .product-item")
     private List<WebElement> productList;
     @FindBy(css = ".product-item-link")
     private List<WebElement> productItemLink;
-    @FindBy(xpath = "//span[@data-price-type='finalPrice']")
+    @FindBy(css = "[data-price-type='finalPrice'] span")
     private List<WebElement> finalPriceList;
-    @FindBy(xpath = "//span[@data-price-type='oldPrice']")
+    @FindBy(xpath = "//span[@data-price-type='oldPrice']/span")
     private List<WebElement> oldPriceList;
     @FindBy(xpath = "//button[@type='submit']")
     private List<WebElement> submitButton;
@@ -60,34 +62,30 @@ public class ListingModel {
         try {
             if (oldPriceList.get(product_id).isDisplayed()) {
                 // Fetching the Old Price in listing page
-                list_product_old_price = oldPriceList.get(product_id).findElement(By.className("price")).getText();
+                list_product_old_price = oldPriceList.get(product_id).getText();
                 Loggers.getLogger().info("Product Old Price: " + list_product_old_price);
                 ExtentReport.getExtentNode().pass("Product Old Price: " + list_product_old_price);
 
                 // Fetching the Final Price in listing page
-                list_product_final_price = finalPriceList.get(product_id).findElement(By.className("price")).getText();
+                list_product_final_price = finalPriceList.get(product_id).getText();
                 Loggers.getLogger().info("Product Final Price: " + list_product_final_price);
                 ExtentReport.getExtentNode().pass("Product Final Price: " + list_product_final_price);
             }
         } catch (Exception e) {
             // Fetching Final Price if Old Price not present
-            try {
-                if (finalPriceList.get(product_id).isDisplayed()) {
-                    list_product_final_price = finalPriceList.get(product_id).findElement(By.className("price")).getText();
-                    Loggers.getLogger().info("Product Final Price: " + list_product_final_price);
-                    ExtentReport.getExtentNode().pass("Product Final Price: " + list_product_final_price);
-                }
-            } catch (Exception er) {
-                Loggers.getLogger().error("Could not fetch the Product Price in listing page");
-                ExtentReport.getExtentNode().pass("Could not fetch the Product Price in listing page");
+            if (finalPriceList.get(product_id).isDisplayed()) {
+                list_product_final_price = finalPriceList.get(product_id).getText();
+                Loggers.getLogger().info("Product Final Price: " + list_product_final_price);
+                ExtentReport.getExtentNode().pass("Product Final Price: " + list_product_final_price);
             }
         }
     }
 
     /**
      * Select the product from the Listing
+     *
      * @param searchListingModel - SearchListingModel
-     * @param productModel - ProductModel
+     * @param productModel       - ProductModel
      */
     public void selectProduct(SearchListingModel searchListingModel, ProductModel productModel) {
         String productName = ExcelUtils.getDataMap().get("product_name");

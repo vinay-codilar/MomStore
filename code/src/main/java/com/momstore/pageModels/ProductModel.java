@@ -17,15 +17,15 @@ public class ProductModel {
 
     @FindBy(xpath = "//h1/span")
     private WebElement pdpProductName;
-    @FindBy(xpath = "//span[@data-price-type='oldPrice']/span")
+    @FindBy(css = ".product-info-main [data-price-type='oldPrice'] span")
     private WebElement pdpOldPrice;
-    @FindBy(xpath = "(//span[@data-price-type='finalPrice'])[1]/span")
+    @FindBy(css = ".product-info-main [data-price-type='finalPrice'] span")
     private WebElement pdpFinalPrice;
     @FindBy(id = "product-options-wrapper")
     private WebElement productOptions;
-    @FindBy(xpath = "//div[@class='swatch-attribute size']/div/div")
+    @FindBy(xpath = "//div[@class='swatch-attribute mom_size']/div/div")
     private List<WebElement> swatchesSizeList;
-    @FindBy(xpath = "//div[@class='swatch-attribute color']/div/div")
+    @FindBy(xpath = "//div[@class='swatch-attribute mom_color']/div/div")
     private List<WebElement> swatchesColorList;
     @FindBy(id = "qty")
     private WebElement quantity;

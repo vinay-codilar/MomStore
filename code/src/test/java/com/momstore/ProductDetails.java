@@ -11,6 +11,7 @@ import com.momstore.utilities.ExcelUtils;
 import com.momstore.utilities.Property;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -52,6 +53,7 @@ public class ProductDetails extends TestNGBase {
 
         // Searching for the products
         headerModel.getSearchBox().sendKeys(ExcelUtils.getDataMap().get("search_text"), Keys.RETURN);
+        wait.until(ExpectedConditions.visibilityOf(searchListingModel.getSearchTitle()));
         Assert.assertTrue(searchListingModel.getSearchTitle().getText()
                 .contains(ExcelUtils.getDataMap().get("search_text")));
 
@@ -63,6 +65,7 @@ public class ProductDetails extends TestNGBase {
         ExtentReport.getExtentNode().pass("Clicked on '" + listingModel.getListProductName() + "' product");
 
         // Verifying Product name
+        wait.until(ExpectedConditions.visibilityOf(productModel.getPdpProductName()));
         Assert.assertEquals(listingModel.getListProductName(), productModel.getPdpProductName().getText());
         Loggers.getLogger().info("Product name verified successfully");
         ExtentReport.getExtentNode().pass("Product name verified successfully");
