@@ -40,13 +40,13 @@ public class Initialize {
 
         // Selecting the Browser
         if (Property.getProperty("browser").equalsIgnoreCase("Chrome")) {
-            WebDriverManager.chromedriver().setup();
-//            System.setProperty("webdriver.chrome.driver", "./../momstore_data/browser_drivers/chromedriver");
+//            WebDriverManager.chromedriver().setup();
+            System.setProperty("webdriver.chrome.driver", "./../momstore_data/browser_drivers/chromedriver");
             driver = new ChromeDriver(ch_options);
             Loggers.getLogger().info("Chrome browser is Launched");
         } else if (Property.getProperty("browser").equalsIgnoreCase("Firefox")) {
-            WebDriverManager.firefoxdriver().setup();
-//            System.setProperty("webdriver.gecko.driver", "./../momstore_data/browser_drivers/geckodriver");
+//            WebDriverManager.firefoxdriver().setup();
+            System.setProperty("webdriver.gecko.driver", "./../momstore_data/browser_drivers/geckodriver");
             driver = new FirefoxDriver(ff_options);
             Loggers.getLogger().info("Firefox browser is Launched");
         }

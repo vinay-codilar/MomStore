@@ -1,9 +1,14 @@
 package com.momstore.pageModels;
 
+import com.momstore.utilities.ExcelUtils;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
 
 public class HeaderModel {
     WebDriver driver;
@@ -25,6 +30,19 @@ public class HeaderModel {
     public HeaderModel(WebDriver driver) {
         PageFactory.initElements(driver, this);
         this.driver = driver;
+    }
+
+    /**
+     * Search for products
+     * @param searchListingModel - SearchListingModel
+     * @param wait - WebDriverWait
+     */
+    public void searchForProducts(SearchListingModel searchListingModel, WebDriverWait wait) {
+        // Searching for the products
+        getSearchBox().sendKeys(ExcelUtils.getDataMap().get("search_text"), Keys.RETURN);
+        wait.until(ExpectedConditions.visibilityOf(searchListingModel.getSearchTitle()));
+        Assert.assertTrue(searchListingModel.getSearchTitle().getText()
+                .contains(ExcelUtils.getDataMap().get("search_text")));
     }
 
     /**

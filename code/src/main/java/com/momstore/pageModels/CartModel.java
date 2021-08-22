@@ -17,15 +17,15 @@ import java.util.List;
 
 public class CartModel {
     private WebDriver driver;
-    private String cartProductName;
+    private ArrayList<String> cartProductName;
     private ArrayList<String> cartSwatch;
-    private String cartFinalPrice;
-    private String cartSubtotalPrice;
-    private String cartProductQty;
+    private ArrayList<String> cartFinalPrice;
+    private ArrayList<String> cartSubtotalPrice;
+    private ArrayList<String> cartProductQty;
 
     @FindBy(css = ".cart.item .item-info")
     private List<WebElement> productList;
-    @FindBy(xpath = "//td[@class='col item']")
+    @FindBy(css = ".col.item dd")
     private List<WebElement> swatchOptions;
     @FindBy(css = ".price .cart-price .price")
     private List<WebElement> productFinalPrice;
@@ -36,29 +36,44 @@ public class CartModel {
     @FindBy(css = "h1 span")
     private WebElement cartTitle;
     @FindBy(css = "#shopping-cart-table tbody tr[class='item-info'] td div strong a")
-    private List<WebElement> productsAdded;
+    private List<WebElement> productNames;
     @FindBy(css = ".item .checkout")
     private WebElement checkoutButton;
     @FindBy(css = ".grand.totals")
     private WebElement grandTotalLabel;
 
+    /**
+     * @param driver - WebDriver
+     */
     public CartModel(WebDriver driver) {
         PageFactory.initElements(driver, this);
         this.driver = driver;
     }
 
+    /**
+     * @return WebElement
+     */
     public WebElement getCartTitle() {
         return cartTitle;
     }
 
-    public List<WebElement> getProductsAdded() {
-        return productsAdded;
+    /**
+     * @return List<WebElement>
+     */
+    public List<WebElement> getProductNames() {
+        return productNames;
     }
 
+    /**
+     * @return WebElement
+     */
     public WebElement getCheckoutButton() {
         return checkoutButton;
     }
 
+    /**
+     * @return WebElement
+     */
     public WebElement getGrandTotalLabel() {
         return grandTotalLabel;
     }
@@ -70,36 +85,37 @@ public class CartModel {
         WebDriverWait wait = new WebDriverWait(driver, 5);
 
         wait.until(ExpectedConditions.visibilityOfAllElements(productList));
-        cartSwatch = new ArrayList<>(10);
+        this.cartSwatch = new ArrayList<>();
+        this.cartProductName = new ArrayList<>();
+        this.cartFinalPrice = new ArrayList<>();
+        this.cartSubtotalPrice = new ArrayList<>();
+        this.cartProductQty = new ArrayList<>();
 
         for (WebElement element : productList) {
+
             // Fetching the Product name
-            for (WebElement productObject : productsAdded) {
-                Loggers.getLogger().info(productObject.getAttribute("innerHTML"));
-                cartProductName = productObject.getText();
+            for (WebElement productObject : productNames) {
+                this.cartProductName.add(productObject.getAttribute("innerHTML"));
             }
 
             // Fetching the Product Swatch options
             for (WebElement swatch : swatchOptions) {
-                String swatch_text = (String) ((JavascriptExecutor) driver)
-                        .executeScript("return arguments[0].text;", swatch);
-                cartSwatch.add(swatch_text);
-//                cart_swatch.add(swatch.findElement(By.xpath("//dl/dd")).getText());
+                cartSwatch.add(swatch.getText());
             }
 
             // Fetching Product Final Price
             for (WebElement final_price : productFinalPrice) {
-                cartFinalPrice = final_price.getText();
+                this.cartFinalPrice.add(final_price.getText());
             }
 
             // Fetching the Product Subtotal
             for (WebElement subtotal : productSubtotalPrice) {
-                cartSubtotalPrice = subtotal.getText();
+                this.cartSubtotalPrice.add(subtotal.getText());
             }
 
             // Fetching the Product qty
             for (WebElement qty : productQty) {
-                cartProductQty = qty.getAttribute("value");
+                this.cartProductQty.add(qty.getAttribute("value"));
             }
         }
         Loggers.getLogger().info("Fetched the Product Details from Cart");
@@ -122,7 +138,7 @@ public class CartModel {
         String productName = ExcelUtils.getDataMap().get("product_name");
 
         // Select the product passed from Listing page
-        Iterator<WebElement> iter = getProductsAdded().iterator();
+        Iterator<WebElement> iter = getProductNames().iterator();
         while (iter.hasNext()) {
             String prodName = iter.next().getText();
             if (prodName.equals(productName)) {
@@ -135,7 +151,7 @@ public class CartModel {
     /**
      * @return String
      */
-    public String getCartProductName() {
+    public ArrayList<String> getCartProductName() {
         return cartProductName;
     }
 
@@ -149,21 +165,21 @@ public class CartModel {
     /**
      * @return String
      */
-    public String getCartFinalPrice() {
+    public ArrayList<String> getCartFinalPrice() {
         return cartFinalPrice;
     }
 
     /**
      * @return String
      */
-    public String getCartSubtotalPrice() {
+    public ArrayList<String> getCartSubtotalPrice() {
         return cartSubtotalPrice;
     }
 
     /**
      * @return String
      */
-    public String getCartProductQty() {
+    public ArrayList<String> getCartProductQty() {
         return cartProductQty;
     }
 }

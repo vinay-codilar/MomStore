@@ -3,13 +3,10 @@ package com.momstore;
 import com.momstore.extent_reports.ExtentReport;
 import com.momstore.interfaces.Constants;
 import com.momstore.loggers.Loggers;
-import com.momstore.modules.MouseActions;
 import com.momstore.pageModels.*;
-import com.momstore.pickers.RandomPicker;
 import com.momstore.project_setup.TestNGBase;
 import com.momstore.utilities.ExcelUtils;
 import com.momstore.utilities.Property;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -18,21 +15,24 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Objects;
 
 public class AddToCart extends TestNGBase implements Constants {
     public WebDriver driver;
     WebDriverWait wait;
-    private String productOldPrice;
-    private String productFinalPrice;
-    private String productQuantity;
-    private String productName;
+    private ArrayList<String> pdpProductOldPrice;
+    private ArrayList<String> pdpProductFinalPrice;
+    private ArrayList<String> pdpProductQuantity;
+    private ArrayList<String> pdpProductName;
+    private ArrayList<String> pdpProductSwatches;
 
     @BeforeClass(description = "Pre Test Configurations", alwaysRun = true)
     public void preTestRuns() {
         // Initialize Driver
         driver = initializeDriver();
-        wait = new WebDriverWait(driver, 30);
+        wait = new WebDriverWait(driver, 10);
 
         // Setting the Loggers and Extent Reports
         Loggers.setLogger(UserAccounts.class.getName());
@@ -57,79 +57,49 @@ public class AddToCart extends TestNGBase implements Constants {
         ProductModel productModel = new ProductModel(driver);
         CartModel cartModel = new CartModel(driver);
 
-        // Searching for the products
-        headerModel.getSearchBox().sendKeys(ExcelUtils.getDataMap().get("search_text"), Keys.RETURN);
-        Assert.assertTrue(searchListingModel.getSearchTitle().getText()
-                .contains(ExcelUtils.getDataMap().get("search_text")));
-        // Select the product passed
-        searchListingModel.selectProduct(productModel);
+        // Search for products from Search Listing page
+        headerModel.searchForProducts(searchListingModel, wait);
 
-        productName = productModel.getPdpProductName().getText();
-        productFinalPrice = productModel.getPdpFinalPrice().getText();
-        productQuantity = productModel.getQuantity().getAttribute("value");
+        // Select the product passed
+        searchListingModel.pickRandomProduct();
+        searchListingModel.getProductItemLink().get(searchListingModel.getProductId()).click();
+
+        // Fetch the PDP product details
+//        productModel.fetchProductDetails(searchListingModel, wait);
+
+        // Creating ArrayList objects
+        createVariableObjects();
+
+        // Fetching Product Details
+        wait.until(ExpectedConditions.visibilityOf(productModel.getPdpProductName()));
+        pdpProductName.add(productModel.getPdpProductName().getText());
         try {
-            if (!listingModel.getListProductOldPrice().equals("") || listingModel.getListProductOldPrice() != null) {
+            if (!searchListingModel.getSearchProductOldPrice().equals("") || searchListingModel.getSearchProductOldPrice() != null) {
                 // Fetching the Old price
-                productOldPrice = productModel.getPdpOldPrice().getText();
+                pdpProductOldPrice.add(productModel.getPdpOldPrice().getText());
             }
         } catch (Exception e) {
             Loggers.getLogger().info("No Special Price");
         }
+        this.pdpProductFinalPrice.add(productModel.getPdpFinalPrice().getText());
+        this.pdpProductQuantity.add(productModel.getQuantity().getAttribute("value"));
 
-        try {
-            if (productModel.getProductOptions().isDisplayed()) {
-                // Logging and Reporting
-                Loggers.getLogger().info("Selected a Configurable Product");
-                ExtentReport.getExtentNode().info("Selected a Configurable Product");
-
-                productModel.setProductSwatches();
-
-                if (productModel.getSwatchesSizeList().get(0).isDisplayed()) {
-                    int size_option = RandomPicker.numberPicker(productModel.getSwatchesSizeList().size());
-                    WebElement size_element = productModel.getSwatchesSizeList().get(size_option);
-
-                    // Selecting the Swatches
-                    MouseActions.moveClickEvent(driver, size_element);
-                    productModel.getProductSwatches().add(size_element.getAttribute("option-label"));
-
-                    // Logging and Reporting
-                    Loggers.getLogger().info("Swatch '" + productModel.getProductSwatches().get(0) + "' is selected");
-                    ExtentReport.getExtentNode().info("Swatch '" + productModel.getProductSwatches().get(0) + "' is selected");
-                }
-
-                if (productModel.getSwatchesColorList().get(0).isDisplayed()) {
-                    int color_option = RandomPicker.numberPicker(productModel.getSwatchesColorList().size());
-                    WebElement color_element = productModel.getSwatchesColorList().get(color_option);
-
-                    // Selecting the Swatches
-                    MouseActions.moveClickEvent(driver, color_element);
-                    productModel.getProductSwatches().add(color_element.getAttribute("option-label"));
-
-                    // Logging and Reporting
-                    Loggers.getLogger().info("Swatch '" + productModel.getProductSwatches().get(1) + "' is selected");
-                    ExtentReport.getExtentNode().info("Swatch '" + productModel.getProductSwatches().get(1) + "' is selected");
-                }
-            }
-        } catch (Exception e) {
-            Loggers.getLogger().info("Selected a Simple Product");
-            ExtentReport.getExtentNode().info("Selected a Simple Product");
-        }
+        pdpProductSwatches.addAll(productModel.selectSwatchesIfConfigProduct(wait));
 
         // Selecting the qty to add
-        productModel.setProductQuantity(ExcelUtils.getDataMap().get("qty"));
-        productModel.getQuantity().sendKeys(Keys.DELETE);
-        productModel.getQuantity().sendKeys(productModel.getProductQuantity());
+        wait.until(ExpectedConditions.elementToBeClickable(productModel.getQuantity()));
+        productModel.getQuantity().clear();
+        productModel.getQuantity().sendKeys(ExcelUtils.getDataMap().get("qty"));
+
+        // Click on Add to Cart
+        productModel.getAddToCartButton().click();
 
         // Verify the success message
-        try {
-            wait.until(ExpectedConditions.visibilityOf(productModel.getSuccessMessage()));
-            Assert.assertTrue(productModel.getSuccessMessage().getText().contains("shopping cart"));
-            Loggers.getLogger().info("Success message is displayed");
-            ExtentReport.getExtentNode().pass("Success message is displayed");
-        } catch (Exception e) {
-            Loggers.getLogger().error("Success message is NOT displayed");
-            ExtentReport.getExtentNode().error("Success message is NOT displayed");
-        }
+        wait.until(ExpectedConditions.visibilityOf(productModel.getSuccessMessage()));
+        Assert.assertTrue(productModel.getSuccessMessage().getText().contains("shopping bag"));
+        Loggers.getLogger().info("Success message is displayed");
+        ExtentReport.getExtentNode().pass("Success message is displayed");
+
     }
 
     /**
@@ -152,22 +122,31 @@ public class AddToCart extends TestNGBase implements Constants {
         minicartModel.getViewCart().click();
         cartModel.fetchProductDetails();
 
-        try {
-            // Verifying product details
-            Assert.assertEquals(productName, cartModel.getCartProductName());
-            Assert.assertEquals(productFinalPrice, cartModel.getCartFinalPrice());
-            Assert.assertEquals(productQuantity, cartModel.getCartProductQty());
-//        for (int swatch = 0; swatch < cart_swatch.size(); swatch++) {
-//            Assert.assertEquals(cart_swatch.get(swatch), ProductModel.getProduct_swatches().get(swatch));
-//        }
+        // Verifying product details
+        Iterator<WebElement> cartItems = cartModel.getProductNames().iterator();
+        while (cartItems.hasNext()) {
+            Assert.assertEquals(pdpProductName, cartModel.getCartProductName());
+            Assert.assertEquals(pdpProductFinalPrice, cartModel.getCartFinalPrice());
+            Assert.assertEquals(pdpProductQuantity, cartModel.getCartProductQty());
+            if (!pdpProductSwatches.get(0).equalsIgnoreCase("simple")) {
+                for (int swatch = 0; swatch < cartModel.getCartSwatch().size(); swatch++) {
+                    Assert.assertEquals(cartModel.getCartSwatch().get(swatch).trim(), pdpProductSwatches.get(swatch).trim());
+                }
+            }
 
             // Logging and Extent Reports
+            String productName = cartItems.next().getText();
             Loggers.getLogger().info("'" + productName + "' successfully added to cart");
             ExtentReport.getExtentNode().pass("'" + productName + "' successfully added to cart");
-        } catch (AssertionError e) {
-            Loggers.getLogger().error("'" + productName + "' could NOT be added to cart");
-            ExtentReport.getExtentNode().fail("'" + productName + "' could NOT be added to cart");
         }
+    }
+
+    public void createVariableObjects() {
+        pdpProductName = new ArrayList<>();
+        pdpProductOldPrice = new ArrayList<>();
+        pdpProductFinalPrice = new ArrayList<>();
+        pdpProductQuantity = new ArrayList<>();
+        pdpProductSwatches = new ArrayList<>();
     }
 
 }

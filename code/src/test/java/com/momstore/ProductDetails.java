@@ -51,18 +51,15 @@ public class ProductDetails extends TestNGBase {
         ListingModel listingModel = new ListingModel(driver);
         ProductModel productModel = new ProductModel(driver);
 
-        // Searching for the products
-        headerModel.getSearchBox().sendKeys(ExcelUtils.getDataMap().get("search_text"), Keys.RETURN);
-        wait.until(ExpectedConditions.visibilityOf(searchListingModel.getSearchTitle()));
-        Assert.assertTrue(searchListingModel.getSearchTitle().getText()
-                .contains(ExcelUtils.getDataMap().get("search_text")));
+        // Search for products from Search Listing page
+        headerModel.searchForProducts(searchListingModel, wait);
 
-        listingModel.fetchProductDetails();
+        searchListingModel.fetchProductDetails();
 
         // Clicking on the Product name
-        listingModel.getProductItemLink().get(listingModel.getProductId()).click();
-        Loggers.getLogger().info("Clicked on '" + listingModel.getListProductName() + "' product");
-        ExtentReport.getExtentNode().pass("Clicked on '" + listingModel.getListProductName() + "' product");
+        searchListingModel.getProductItemLink().get(searchListingModel.getProductId()).click();
+        Loggers.getLogger().info("Clicked on '" + searchListingModel.getSearchProductName() + "' product");
+        ExtentReport.getExtentNode().pass("Clicked on '" + searchListingModel.getSearchProductName() + "' product");
 
         // Verifying Product name
         wait.until(ExpectedConditions.visibilityOf(productModel.getPdpProductName()));
@@ -71,21 +68,21 @@ public class ProductDetails extends TestNGBase {
         ExtentReport.getExtentNode().pass("Product name verified successfully");
 
         // Fetching the Final price
-        productModel.setProductFinalPrice(productModel);
+        productModel.setProductFinalPrice();
 
         // Verifying Product prices
         try {
-            if (!listingModel.getListProductOldPrice().equals("") || listingModel.getListProductOldPrice() != null) {
+            if (!searchListingModel.getSearchProductOldPrice().equals("") || searchListingModel.getSearchProductOldPrice() != null) {
                 // Fetching the Old price
                 productModel.setProductOldPrice(productModel.getPdpOldPrice().getText());
 
-                Assert.assertEquals(listingModel.getListProductOldPrice(), productModel.getProductOldPrice());
-                Assert.assertEquals(listingModel.getListProductFinalPrice(), productModel.getProductFinalPrice());
+                Assert.assertEquals(searchListingModel.getSearchProductOldPrice(), productModel.getProductOldPrice());
+                Assert.assertEquals(searchListingModel.getSearchProductFinalPrice(), productModel.getProductFinalPrice());
                 Loggers.getLogger().info("Product old price and final price verified successfully");
                 ExtentReport.getExtentNode().pass("Product old price and final price verified successfully");
             }
         } catch (Exception e) {
-            Assert.assertEquals(listingModel.getListProductFinalPrice(), productModel.getProductFinalPrice());
+            Assert.assertEquals(searchListingModel.getSearchProductFinalPrice(), productModel.getProductFinalPrice());
             Loggers.getLogger().info("Product final price verified successfully");
             ExtentReport.getExtentNode().pass("Product final price verified successfully");
         }

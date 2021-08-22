@@ -44,53 +44,13 @@ public class ListingModel {
     }
 
     /**
-     * Fetch the Product Name, Old Price(If present) and Final Price
-     */
-    public void fetchProductDetails() {
-        // Setting ExtentReports
-        ExtentReport.createNode("Fetch product details in Listing page");
-
-        // Pick random product number
-        product_id = RandomPicker.numberPicker(productList.size());
-
-        // Fetching the Product name
-        list_product_name = productItemLink.get(product_id).getText();
-        Loggers.getLogger().info("Product '" + list_product_name + "' is picked");
-        ExtentReport.getExtentNode().pass("Product '" + list_product_name + "' is picked");
-
-        // Fetching Old Price if present
-        try {
-            if (oldPriceList.get(product_id).isDisplayed()) {
-                // Fetching the Old Price in listing page
-                list_product_old_price = oldPriceList.get(product_id).getText();
-                Loggers.getLogger().info("Product Old Price: " + list_product_old_price);
-                ExtentReport.getExtentNode().pass("Product Old Price: " + list_product_old_price);
-
-                // Fetching the Final Price in listing page
-                list_product_final_price = finalPriceList.get(product_id).getText();
-                Loggers.getLogger().info("Product Final Price: " + list_product_final_price);
-                ExtentReport.getExtentNode().pass("Product Final Price: " + list_product_final_price);
-            }
-        } catch (Exception e) {
-            // Fetching Final Price if Old Price not present
-            if (finalPriceList.get(product_id).isDisplayed()) {
-                list_product_final_price = finalPriceList.get(product_id).getText();
-                Loggers.getLogger().info("Product Final Price: " + list_product_final_price);
-                ExtentReport.getExtentNode().pass("Product Final Price: " + list_product_final_price);
-            }
-        }
-    }
-
-    /**
      * Select the product from the Listing
-     *
-     * @param searchListingModel - SearchListingModel
-     * @param productModel       - ProductModel
+     * @param productModel - ProductModel
      */
-    public void selectProduct(SearchListingModel searchListingModel, ProductModel productModel) {
+    public void selectProduct(ProductModel productModel) {
         String productName = ExcelUtils.getDataMap().get("product_name");
         Actions act = new Actions(driver);
-        List<WebElement> prodList = searchListingModel.getProductName();
+        List<WebElement> prodList = getProductList();
 
         // Selecting the product from Listing page
         for (WebElement element : prodList) {

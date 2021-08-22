@@ -61,7 +61,7 @@ public class PlaceOrder extends TestNGBase {
         Assert.assertTrue(searchListingModel.getSearchTitle().getText()
                 .contains(ExcelUtils.getDataMap().get("search_text")));
         // Select the product passed
-        searchListingModel.selectProduct(productModel);
+        searchListingModel.selectProduct(productModel, wait);
 
         // Navigate to the Checkout page
         wait.until(ExpectedConditions.visibilityOf(productModel.getSuccessMessage()));

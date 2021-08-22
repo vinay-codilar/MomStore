@@ -1,19 +1,29 @@
 package com.momstore.pageModels;
 
+import com.momstore.extent_reports.ExtentReport;
+import com.momstore.loggers.Loggers;
+import com.momstore.pickers.RandomPicker;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ProductModel {
-    private String productOldPrice;
-    private String productFinalPrice;
-    private String productQuantity;
+    private WebDriver driver;
+    private ArrayList<String> productOldPrice;
+    private ArrayList<String> productFinalPrice;
+    private ArrayList<String> productQuantity;
     private ArrayList<String> productSwatches;
-    private String productName;
+    private ArrayList<String> productName;
 
     @FindBy(xpath = "//h1/span")
     private WebElement pdpProductName;
@@ -21,11 +31,11 @@ public class ProductModel {
     private WebElement pdpOldPrice;
     @FindBy(css = ".product-info-main [data-price-type='finalPrice'] span")
     private WebElement pdpFinalPrice;
-    @FindBy(id = "product-options-wrapper")
+    @FindBy(css = "form #product-options-wrapper")
     private WebElement productOptions;
-    @FindBy(xpath = "//div[@class='swatch-attribute mom_size']/div/div")
+    @FindBy(css = ".swatch-option.text")
     private List<WebElement> swatchesSizeList;
-    @FindBy(xpath = "//div[@class='swatch-attribute mom_color']/div/div")
+    @FindBy(css = ".swatch-option.color")
     private List<WebElement> swatchesColorList;
     @FindBy(id = "qty")
     private WebElement quantity;
@@ -35,34 +45,89 @@ public class ProductModel {
     private WebElement errorMessage;
     @FindBy(xpath = "//div[@data-ui-id='message-success']/div")
     private WebElement successMessage;
+    @FindBy(css = "div[class='mage-error']")
+    private WebElement swatchReqErr;
 
     /**
      * @param driver - Constructor
      */
     public ProductModel(WebDriver driver) {
         PageFactory.initElements(driver, this);
+        this.driver = driver;
     }
 
     /**
-     * @param productOldPrice - String
+     * Select the swatches if Configurable Products are selected
      */
-    public void setProductOldPrice(String productOldPrice) {
-        this.productOldPrice = productOldPrice;
+    public ArrayList<String> selectSwatchesIfConfigProduct(WebDriverWait wait) {
+        this.productSwatches = new ArrayList<>();
+
+        try {
+            wait.until(ExpectedConditions.visibilityOf(getProductOptions()));
+            if (getProductOptions().isDisplayed()) {
+                // Logging and Reporting
+                Loggers.getLogger().info("Selected a Configurable Product");
+                ExtentReport.getExtentNode().info("Selected a Configurable Product");
+
+                JavascriptExecutor executor = (JavascriptExecutor) driver;
+                executor.executeScript("arguments[0].scrollIntoView();", getPdpProductName());
+                Thread.sleep(2000);
+
+                wait.until(ExpectedConditions.elementToBeClickable(getSwatchesSizeList().get(0)));
+                System.out.println("Size: " + getSwatchesSizeList().size());
+                if (getSwatchesSizeList().size() > 0) {
+                    int sizeOption = RandomPicker.numberPicker(getSwatchesSizeList().size());
+                    WebElement sizeElement = getSwatchesSizeList().get(0);
+
+                    // Selecting the Swatches
+//                    executor.executeScript("arguments[0].click();", sizeElement);
+                    sizeElement.click();
+                    this.productSwatches.add(sizeElement.getAttribute("data-option-label"));
+
+                    // Logging and Reporting
+                    Loggers.getLogger().info("Swatch '" + getProductSwatches().get(0) + "' is selected");
+                    ExtentReport.getExtentNode().info("Swatch '" + getProductSwatches().get(0) + "' is selected");
+                }
+
+                wait.until(ExpectedConditions.elementToBeClickable(getSwatchesColorList().get(0)));
+                System.out.println("Color: " + getSwatchesColorList().size());
+                if (getSwatchesColorList().size() > 0) {
+                    int colorOption = RandomPicker.numberPicker(getSwatchesColorList().size());
+                    WebElement colorElement = getSwatchesColorList().get(0);
+
+                    // Selecting the Swatches
+//                    executor.executeScript("arguments[0].click();", colorElement);
+                    colorElement.click();
+                    this.productSwatches.add(colorElement.getAttribute("data-option-label"));
+
+                    // Logging and Reporting
+                    Loggers.getLogger().info("Swatch '" + getProductSwatches().get(0) + "' is selected");
+                    ExtentReport.getExtentNode().info("Swatch '" + getProductSwatches().get(0) + "' is selected");
+                }
+                return getProductSwatches();
+            }
+        } catch (Exception e) {
+            Loggers.getLogger().info("Selected a Simple Product");
+            ExtentReport.getExtentNode().info("Selected a Simple Product");
+        }
+        return new ArrayList<String>(Arrays.asList("simple"));
     }
 
     /**
-     * @param productModel - ProductModel
+     * Creating the ArrayList objects
      */
-    public void setProductFinalPrice(ProductModel productModel) {
-        productFinalPrice = productModel.getPdpFinalPrice().getText();
-        this.productFinalPrice = productFinalPrice;
+    public void createVariableObjects() {
+        this.productName = new ArrayList<>();
+        this.productOldPrice = new ArrayList<>();
+        this.productFinalPrice = new ArrayList<>();
+        this.productQuantity = new ArrayList<>();
     }
 
     /**
-     * @param productQuantity - String
+     * @return void
      */
-    public void setProductQuantity(String productQuantity) {
-        this.productQuantity = productQuantity;
+    public void setProductFinalPrice() {
+        productFinalPrice.add(getPdpFinalPrice().getText());
     }
 
     /**
@@ -75,21 +140,28 @@ public class ProductModel {
     /**
      * @return String
      */
-    public String getProductOldPrice() {
+    public ArrayList<String> getProductOldPrice() {
         return productOldPrice;
+    }
+
+    /**
+     * @param productOldPrice - String
+     */
+    public void setProductOldPrice(String productOldPrice) {
+        this.productOldPrice.add(productOldPrice);
     }
 
     /**
      * @return String
      */
-    public String getProductFinalPrice() {
+    public ArrayList<String> getProductFinalPrice() {
         return productFinalPrice;
     }
 
     /**
      * @return String
      */
-    public String getProductQuantity() {
+    public ArrayList<String> getProductQuantity() {
         return productQuantity;
     }
 
@@ -103,7 +175,7 @@ public class ProductModel {
     /**
      * @return String
      */
-    public String getProductName() {
+    public ArrayList<String> getProductName() {
         return productName;
     }
 
@@ -175,5 +247,12 @@ public class ProductModel {
      */
     public WebElement getSuccessMessage() {
         return successMessage;
+    }
+
+    /**
+     * @return WebElement
+     */
+    public WebElement getSwatchReqErr() {
+        return swatchReqErr;
     }
 }
