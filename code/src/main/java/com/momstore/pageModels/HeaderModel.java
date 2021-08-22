@@ -14,7 +14,7 @@ public class HeaderModel {
     private WebElement searchBox;
     @FindBy(css = ".showcart")
     private WebElement cartIcon;
-    @FindBy(css = ".customer-welcome .customer-name span")
+    @FindBy(xpath = "//span[@class='customer-name']/span")
     private WebElement accountIcon;
     @FindBy(css = ".header .links li .authorization-link")
     private WebElement logoutLink;

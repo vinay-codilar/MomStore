@@ -12,6 +12,8 @@ public class LoginModel extends TestNGBase {
 
     @FindBy(css = "fieldset.login .field.note")
     private WebElement signInTitle;
+    @FindBy(css = ".actions-toolbar div[class='primary'] a")
+    private WebElement createAccountLink;
     @FindBy(id = "email")
     private WebElement emailId;
     @FindBy(id = "pass")
@@ -36,6 +38,13 @@ public class LoginModel extends TestNGBase {
      */
     public WebElement getSignInTitle() {
         return signInTitle;
+    }
+
+    /**
+     * @return WebElement - Create Account Link
+     */
+    public WebElement getCreateAccountLink() {
+        return createAccountLink;
     }
 
     /**

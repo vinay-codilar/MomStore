@@ -12,23 +12,27 @@ public class SignupModel extends TestNGBase {
 
     @FindBy(css = ".header .links")
     private WebElement headerLinks;
-    @FindBy(xpath = "//ul[@class='header links']/li[3]/a")
-    private WebElement createAccountLink;
-    @FindBy(xpath = "//div/input[@id='firstname']")
+    @FindBy(css = "h1 span")
+    private WebElement pageTitle;
+    @FindBy(id = "firstname")
     private WebElement firstName;
-    @FindBy(xpath = "//div/input[@id='lastname']")
+    @FindBy(id = "lastname")
     private WebElement lastName;
-    @FindBy(xpath = "//div/input[@id='is_subscribed']")
-    private WebElement isSubscribed;
-    @FindBy(xpath = "//div/input[@id='email_address']")
+    @FindBy(css = ".terms-conditions label")
+    private WebElement termsCheckbox;
+    @FindBy(id = "email_address")
     private WebElement emailAddress;
-    @FindBy(xpath = "//div/input[@id='password']")
+    @FindBy(css = ".control #phone_number")
+    private WebElement phoneNumber;
+    @FindBy(id = "prefix")
+    private WebElement prefixTitle;
+    @FindBy(css = ".control #password")
     private WebElement password;
-    @FindBy(xpath = "//div/input[@id='password-confirmation']")
+    @FindBy(css = ".control #password-confirmation")
     private WebElement passwordConfirmation;
     @FindBy(css = ".action.submit.primary")
     private WebElement submit;
-    @FindBy(xpath = "//div[@data-ui-id='message-error']/div")
+    @FindBy(xpath = "//div[@class='messages']/div/div")
     private WebElement messages;
 
     /**
@@ -47,10 +51,10 @@ public class SignupModel extends TestNGBase {
     }
 
     /**
-     * @return WebElement - Create Account Link
+     * @return WebElement - Page title
      */
-    public WebElement getCreateAccountLink() {
-        return createAccountLink;
+    public WebElement getPageTitle() {
+        return pageTitle;
     }
 
     /**
@@ -70,8 +74,8 @@ public class SignupModel extends TestNGBase {
     /**
      * @return WebElement - Subscribed Checkbox
      */
-    public WebElement getIsSubscribed() {
-        return isSubscribed;
+    public WebElement getTermsCheckbox() {
+        return termsCheckbox;
     }
 
     /**
@@ -79,6 +83,20 @@ public class SignupModel extends TestNGBase {
      */
     public WebElement getEmailAddress() {
         return emailAddress;
+    }
+
+    /**
+     * @return WebElement - Phone Number
+     */
+    public WebElement getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    /**
+     * @return WebElement - Prefix Title
+     */
+    public WebElement getPrefixTitle() {
+        return prefixTitle;
     }
 
     /**

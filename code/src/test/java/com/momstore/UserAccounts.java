@@ -2,6 +2,7 @@ package com.momstore;
 
 import com.momstore.extent_reports.ExtentReport;
 import com.momstore.loggers.Loggers;
+import com.momstore.pageModels.AccountModel;
 import com.momstore.pageModels.HeaderModel;
 import com.momstore.pageModels.LoginModel;
 import com.momstore.pageModels.SignupModel;
@@ -9,8 +10,10 @@ import com.momstore.project_setup.TestNGBase;
 import com.momstore.utilities.ExcelUtils;
 import com.momstore.utilities.Property;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -32,7 +35,7 @@ public class UserAccounts extends TestNGBase {
         // Initialize Driver
         driver = initializeDriver();
         wait = new WebDriverWait(driver, 10);
-        fluent = new FluentWait<>(driver).withTimeout(10, TimeUnit.SECONDS).pollingEvery(500, TimeUnit.MICROSECONDS)
+        fluent = new FluentWait<>(driver).withTimeout(10, TimeUnit.SECONDS).pollingEvery(500, TimeUnit.MILLISECONDS)
                 .ignoring(Exception.class);
 
         // Setting the Loggers and Extent Reports
@@ -50,41 +53,51 @@ public class UserAccounts extends TestNGBase {
         ExtentReport.createNode("Create User Account");
 
         // PageModel object
+        HeaderModel headerModel = new HeaderModel(driver);
         SignupModel signupModel = new SignupModel(driver);
+        AccountModel accountModel = new AccountModel(driver);
         LoginModel loginModel = new LoginModel(driver);
 
-        // Redirecting to Create account page
-        signupModel.getCreateAccountLink().click();
+        // Click on Login link
+        wait.until(ExpectedConditions.elementToBeClickable(headerModel.getLoginLink()));
+        headerModel.getLoginLink().click();
+
+        // Click on Create Account link
+        wait.until(ExpectedConditions.elementToBeClickable(loginModel.getCreateAccountLink()));
+        loginModel.getCreateAccountLink().click();
+
+        Assert.assertEquals(signupModel.getPageTitle().getText(), ExcelUtils.getDataMap().get("create_title"));
+        Loggers.getLogger().info("Redirected to Create Account page");
+        ExtentReport.getExtentNode().pass("Redirected to Create Account page");
 
         // Filling the form
+//        signupModel.getPhoneNumber().sendKeys(ExcelUtils.getDataMap().get("mobile_number"));
+//        signupModel.getEmailAddress().sendKeys(ExcelUtils.getDataMap().get("email_id"));
+        signupModel.getPhoneNumber().sendKeys("282675783");
+        signupModel.getEmailAddress().sendKeys("index@gmail.com");
+
+        Select select = new Select(signupModel.getPrefixTitle());
+
+        select.selectByValue("Mr");
         signupModel.getFirstName().sendKeys(ExcelUtils.getDataMap().get("first_name"));
         signupModel.getLastName().sendKeys(ExcelUtils.getDataMap().get("last_name"));
-
-        Loggers.getLogger().info("Redirected to Create Account page");
-        if (Objects.equals(Property.getProperty("is_subscribed"), 1))
-            signupModel.getIsSubscribed().click();
-
-        signupModel.getEmailAddress().sendKeys(ExcelUtils.getDataMap().get("email_id"));
         signupModel.getPassword().sendKeys(ExcelUtils.getDataMap().get("password"));
         signupModel.getPasswordConfirmation().sendKeys(ExcelUtils.getDataMap().get("password"));
+
+        signupModel.getTermsCheckbox().click();
         signupModel.getSubmit().click();
 
         // Fetching the User First and Last name from Excel
         String firstName = ExcelUtils.getDataMap().get("first_name");
-        String lastName = ExcelUtils.getDataMap().get("last_name");
 
         // Verify if the account is created / not
         wait.until(ExpectedConditions.visibilityOf(signupModel.getMessages()));
-        try {
-            wait.until(ExpectedConditions.visibilityOf(loginModel.getUserName()));
-            Assert.assertTrue(loginModel.getUserName().getText().contains(firstName + " " + lastName));
-            Loggers.getLogger().info("User Account Created Successfully");
-            ExtentReport.getExtentNode().pass("User Account Created Successfully");
-        } catch (Exception e) {
-            Assert.assertTrue(signupModel.getMessages().getText().contains("There is already an account with this email address."));
-            Loggers.getLogger().error("User Account Already Exists");
-            ExtentReport.getExtentNode().fail("User Account Already Exists");
-        }
+        Assert.assertEquals(accountModel.getMessages().getText(), "Thank you for registering with Mom Store.");
+
+        wait.until(ExpectedConditions.visibilityOf(accountModel.getUserName()));
+        Assert.assertEquals(accountModel.getUserName().getText(), firstName);
+        Loggers.getLogger().info("User Account Created Successfully");
+        ExtentReport.getExtentNode().pass("User Account Created Successfully");
     }
 
     /**
@@ -98,6 +111,7 @@ public class UserAccounts extends TestNGBase {
         // PageModel object
         HeaderModel headerModel = new HeaderModel(driver);
         LoginModel loginModel = new LoginModel(driver);
+        AccountModel accountModel = new AccountModel(driver);
 
         // Click on Login link
         wait.until(ExpectedConditions.elementToBeClickable(headerModel.getLoginLink()));
@@ -105,9 +119,9 @@ public class UserAccounts extends TestNGBase {
 
         // Verify the sign in page title and link
         Assert.assertTrue(driver.getCurrentUrl().contains("customer/account/login/"));
-        Assert.assertEquals(loginModel.getSignInTitle().getText(), "SignIn");
-//        Assert.assertEquals(loginModel.getSignInTitle().getText(), ExcelUtils.getDataMap().get("signin_title"));
+        Assert.assertEquals(loginModel.getSignInTitle().getText(), ExcelUtils.getDataMap().get("signin_title"));
         Loggers.getLogger().info("Redirected to Login page");
+        ExtentReport.getExtentNode().pass("Redirected to Login page");
 
         // Entering the form details
         loginModel.getEmailId().sendKeys(ExcelUtils.getDataMap().get("email_id"));
@@ -117,8 +131,9 @@ public class UserAccounts extends TestNGBase {
         String firstName = ExcelUtils.getDataMap().get("first_name");
 
         // Verifying if user is logged in
-        fluent.until(ExpectedConditions.textToBePresentInElement(headerModel.getAccountIcon(), firstName));
-        Assert.assertEquals(headerModel.getAccountIcon().getText(), firstName);
+//        fluent.until(ExpectedConditions.textToBePresentInElement(headerModel.getAccountIcon(), firstName));
+        wait.until(ExpectedConditions.visibilityOf(accountModel.getUserName()));
+        Assert.assertEquals(accountModel.getUserName().getText(), firstName);
         Loggers.getLogger().info("User logged in Successfully");
         ExtentReport.getExtentNode().pass("User logged in Successfully");
     }
@@ -133,19 +148,18 @@ public class UserAccounts extends TestNGBase {
 
         // PageModel object
         HeaderModel headerModel = new HeaderModel(driver);
+        AccountModel accountModel = new AccountModel(driver);
+
+        Actions act = new Actions(driver);
 
         // Logout from the account
         if (driver.getCurrentUrl().contains("customer/account/") || driver.getCurrentUrl().contains("/")) {
-            headerModel.getAccountIcon().click();
-            try {
-                headerModel.getLogoutLink().click();
-                Assert.assertTrue(driver.getCurrentUrl().contains("customer/account/logout"));
-                Loggers.getLogger().info("User is successfully Logged Out");
-                ExtentReport.getExtentNode().pass("User is successfully Logged Out");
-            } catch (Exception e) {
-                Loggers.getLogger().error("User could NOT be logged out");
-                ExtentReport.getExtentNode().fail("User could NOT be logged out");
-            }
+//            act.moveToElement(headerModel.getAccountIcon()).pause(500).build().perform();
+//            headerModel.getLogoutLink().click();
+            accountModel.getLogoutLink().click();
+            Assert.assertTrue(driver.getCurrentUrl().contains("customer/account/logout"));
+            Loggers.getLogger().info("User is successfully Logged Out");
+            ExtentReport.getExtentNode().pass("User is successfully Logged Out");
         } else {
             Loggers.getLogger().error("User is not Logged in");
             ExtentReport.getExtentNode().fail("User is not Logged in");

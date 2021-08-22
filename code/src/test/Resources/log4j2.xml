@@ -4,8 +4,8 @@
         <Property name="baseDir">Logs</Property>
     </Properties>
     <Appenders>
-        <RollingFile name="RollingFile" fileName="./../magento_data/${baseDir}/magento.log"
-                     filePattern="./../magento_data/${baseDir}/$${date:yyyy-MM}/magento-%d{MM-dd-yyyy}-%i.log">
+        <RollingFile name="RollingFile" fileName="./../momstore_data/${baseDir}/momstore.log"
+                     filePattern="./../momstore_data/${baseDir}/$${date:yyyy-MM}/momstore-%d{MM-dd-yyyy}-%i.log">
             <PatternLayout>
                 <Pattern>%d{dd:MM:yyyy - HH:mm:ss} [%t] %p %c{3} - %m%n</Pattern>
             </PatternLayout>

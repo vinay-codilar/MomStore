@@ -7,7 +7,7 @@
     <test thread-count="5" name="SmokeTests">
         <groups>
             <run>
-                <include name="userAccounts.accountLogin"/>
+                <include name="userAccounts.*"/>
                 <exclude name="productDetails.*"/>
                 <exclude name="addToCart.*"/>
                 <exclude name="placeOrder.*"/>
