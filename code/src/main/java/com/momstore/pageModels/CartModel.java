@@ -39,7 +39,7 @@ public class CartModel {
     private List<WebElement> productNames;
     @FindBy(css = ".item .checkout")
     private WebElement checkoutButton;
-    @FindBy(css = ".grand.totals")
+    @FindBy(css = ".grand.totals th strong")
     private WebElement grandTotalLabel;
 
     /**
